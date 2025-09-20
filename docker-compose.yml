@@ -1,7 +1,30 @@
 services:
   nginx:
     image: diegohan1/refugio-nginx:V1
+    container_name: refugio_nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+    networks:
+      - refugio_net
+
   php:
     image: diegohan1/refugio-php:V1
+    container_name: refugio_php
+    depends_on:
+      - db
+    networks:
+      - refugio_net
+
   db:
     image: diegohan1/refugio-db:V1
+    container_name: refugio_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: refugio
+      MYSQL_USER: refugio_user
+      MYSQL_PASSWORD: refugio_pass
+    networks:
+      - refugio_net
