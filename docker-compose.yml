@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: refugio_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - refugio_net
+
+  php:
+    build:
+      context: .
+      dockerfile: php.Dockerfile   # Usamos nuestro Dockerfile personalizado
+    container_name: refugio_php
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - refugio_net
+
+  db:
+    image: mysql:8.0
+    container_name: refugio_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: refugio
+      MYSQL_USER: refugio_user
+      MYSQL_PASSWORD: refugio_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - refugio_net
+  
+volumes:
+  db_data:
+
+networks:
+  refugio_net:
+    driver: bridge
